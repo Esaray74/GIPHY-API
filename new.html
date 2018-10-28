@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <title>GIPHY</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.0.0/css/bootstrap.min.css" />
+</head>
+
+<body>
+    <div class="container">
+        <div id="button-dump"> Dump buttons here!</div>
+        <h1>GIPHY search</h1>
+
+        <form id="gif-form">
+            <label for="gif-input">Search for a GIF!</label>
+            <input type="text" id="gif-input"><br>
+
+            <input id="find-gif" type="submit" value="gif-Search">
+        </form>
+
+        <div id="gif-view"></div>
+
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+        <script type="text/javascript">
+
+            let colors = ["red", "blue", "green", "yellow"]
+
+            $("#find-gif").on("click", function (event) {
+                event.preventDefault();
+
+                var gif = $("#gif-input").val().trim();
+                var queryURL = "http://api.giphy.com/v1/gifs/search?q=" + gif + "&api_key=z4H5u3sCRxmfShjX2okNs8tZDfEtreov&limit=10";
+
+                $.ajax({
+                    url: queryURL,
+                    method: "get"
+                }).then(function (response) {
+                    console.log(response.data)
+                    let gifInfo = response.data;
+                    for (i in gifInfo) {
+                        $("#gif-view").prepend("<img src='" + gifInfo[i].images.original.url + "' style='height:350px; width:350px;'/>")
+                    }
+                });
+                colors.push(gif);
+                renderButtons();
+            });
+            renderButtons();
+
+            //display the GIFs when a button is clicked
+            $(document).on("click", ".gif-btn", displayGifInfo);
+
+            //I was unable to get the GIFs to start and pause. 
+            //WHat is needed is to assign data-states to all the GIFs added 
+            //to the page and then make the animated and still GIFs attributes 
+            //so that the following code will run properly
+            
+            $(".gif").on("click", function () {
+                var state = $(this).attr("data-state");
+                if (state === "still") {
+                    var animateData = $(this).attr("data-animate")
+                    $(this).attr("src", animateData);
+                    $(this).attr("data-state", "animate");
+                } else {
+                    $(this).attr("src", $(this).attr("data-still"));
+                    $(this).attr("data-state", "still");
+                }
+            });
+
+            function renderButtons() {
+                $("#button-dump").empty();
+                for (var i = 0; i < colors.length; i++) {
+                    var a = $("<button>");
+                    a.addClass("gif-btn");
+                    a.attr("data-name", colors[i]);
+                    a.text(colors[i]);
+                    $("#button-dump").prepend(a);
+                }
+            };
+
+            function displayGifInfo() {
+                let gif = $(this).attr("data-name");
+                var queryURL = "http://api.giphy.com/v1/gifs/search?q=" + gif + "&api_key=z4H5u3sCRxmfShjX2okNs8tZDfEtreov&limit=10";
+
+                $.ajax({
+                    url: queryURL,
+                    method: "get"
+                }).then(function (response) {
+                    console.log(response.data)
+                    let gifInfo = response.data;
+                    for (i in gifInfo) {
+                        gifImage = ("<img src='" + gifInfo[i].images.original.url + "' style='height:350px; width:350px;'/>");
+                        $("#gif-view").prepend(gifImage);
+                    }
+                });
+            };
+
+        </script>
+    </div>
+</body>
+
+</html>
